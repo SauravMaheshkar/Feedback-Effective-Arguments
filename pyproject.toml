@@ -6,6 +6,7 @@ line-length = 88
 
 [tool.pylint.messages_control]
 disable = [
+    "too-many-locals",
     "no-member",
     "too-many-arguments",
     "too-few-public-methods",
@@ -20,6 +21,12 @@ disable = [
 max-line-length = 88
 
 [[tool.mypy.overrides]]
+module = [
+    'joblib',
+    'pandas',
+    'sklearn.model_selection',
+    'sklearn.preprocessing',
+]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
