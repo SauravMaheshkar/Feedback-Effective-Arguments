@@ -22,6 +22,7 @@ max-line-length = 88
 
 [[tool.mypy.overrides]]
 module = [
+    'src.*',
     'joblib',
     'pandas',
     'sklearn.model_selection',
