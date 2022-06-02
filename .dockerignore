@@ -7,8 +7,8 @@
 .pytest_cache/
 .mypy_cache/
 
-data/
-models/
+wandb/
+output/
 notebooks/
 
 **/.DS_Store

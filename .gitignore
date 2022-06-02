@@ -5,9 +5,9 @@
 .pytest_cache/
 .mypy_cache/
 
+wandb/
 venv/
-data/
-models/
+output/
 notebooks/
 
 **/.DS_Store
