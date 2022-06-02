@@ -49,7 +49,7 @@ if __name__ == "__main__":
         project="FeedBack-Effective-Arguments",
         job_type="train",
         group=config["model_name"],
-        tags=[config["model_name"], config["strategy"]],
+        tags=[config["model_name"], config["strategy"], str(config["seed"])],
         config=config,
     )
 
