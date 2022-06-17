@@ -11,7 +11,6 @@ __all__ = ["FeedBackModel"]
 class MeanPooling(nn.Module):
     """Mean Pooling Utility Class"""
 
-    # pylint: disable=R0201
     def forward(
         self, last_hidden_state: torch.Tensor, attention_mask: torch.Tensor
     ) -> torch.Tensor:
@@ -42,7 +41,15 @@ class FeedBackModel(nn.Module):
         super().__init__()
         self.model = AutoModel.from_pretrained(cfg["model_name"])
         self.config = AutoConfig.from_pretrained(cfg["model_name"])
-        self.drop = nn.Dropout(p=0.2)
+        self.config.update(
+            {
+                "hidden_dropout_prob": 0.0,
+                "add_pooling_layer": False,
+                "hidden_act": "swish",
+            }
+        )
+        self.layer_norm = nn.LayerNorm(self.config.hidden_size)
+        self.drop = nn.Dropout(p=cfg["classifier_dropout"])
         self.pooler = MeanPooling()
         self.output_layer = nn.Linear(self.config.hidden_size, cfg["num_classes"])
 
@@ -59,6 +66,7 @@ class FeedBackModel(nn.Module):
         """
         out = self.model(input_ids=ids, attention_mask=mask, output_hidden_states=False)
         out = self.pooler(out.last_hidden_state, mask)
+        out = self.layer_norm(out)
         out = self.drop(out)
         outputs = self.output_layer(out)
         return outputs
