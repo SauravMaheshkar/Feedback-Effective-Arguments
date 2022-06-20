@@ -1,3 +1,4 @@
+bitsandbytes-cuda113==0.26.0
 black==22.3.0
 mypy==0.961
 numpy==1.21.6

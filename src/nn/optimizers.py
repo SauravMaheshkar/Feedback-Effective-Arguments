@@ -2,7 +2,7 @@
 import typing
 from typing import List
 
-import torch
+import bitsandbytes as bnb
 from torch import nn
 from torch.optim import Optimizer
 
@@ -49,7 +49,7 @@ def fetch_optimizer(
     ]
 
     if optimizer == "AdamW":
-        optimizer = torch.optim.AdamW(
+        optimizer = bnb.optim.AdamW8bit(
             optimizer_grouped_parameters,
             lr=learning_rate,
             weight_decay=weight_decay,
