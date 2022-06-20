@@ -6,11 +6,10 @@ from typing import DefaultDict, Dict, Iterable, Tuple
 
 import numpy as np
 import torch
+import wandb
 from rich import print
 from rich.progress import track
 from torch import nn
-
-import wandb
 
 __all__ = ["run_training"]
 
@@ -34,6 +33,7 @@ def train_one_epoch(
     model: nn.Module,
     optimizer: torch.optim.Optimizer,
     scheduler,
+    scaler,
     dataloader: Iterable,
     device,
     epoch: int,
@@ -78,16 +78,19 @@ def train_one_epoch(
         # Get Batch Size
         batch_size = ids.size(0)
 
-        # Forward Pass
-        outputs = model(ids, mask)
+        with torch.cuda.amp.autocast():
+            # Forward Pass
+            outputs = model(ids, mask)
 
-        # Calculate Loss and Perform Backpropagation
-        loss = criterion(outputs, targets)
+            # Calculate Loss and Perform Backpropagation
+            loss = criterion(outputs, targets)
+
         loss = loss / cfg["n_accumulate"]
-        loss.backward()
+        scaler.scale(loss).backward()
 
         if (step + 1) % cfg["n_accumulate"] == 0:
-            optimizer.step()
+            scaler.step(optimizer)
+            scaler.update()
 
             # zero the parameter gradients
             optimizer.zero_grad()
@@ -145,11 +148,12 @@ def valid_one_epoch(model: nn.Module, dataloader: Iterable, device, fold: int) -
         # Get Batch Size
         batch_size = ids.size(0)
 
-        # Forward Pass
-        outputs = model(ids, mask)
+        with torch.cuda.amp.autocast():
+            # Forward Pass
+            outputs = model(ids, mask)
 
-        # Calculate Loss
-        loss = criterion(outputs, targets)
+            # Calculate Loss
+            loss = criterion(outputs, targets)
 
         running_loss += loss.item() * batch_size
         dataset_size += batch_size
@@ -160,7 +164,7 @@ def valid_one_epoch(model: nn.Module, dataloader: Iterable, device, fold: int) -
         wandb.log({f"Valid/Fold-{fold} Loss": epoch_loss})
 
     # Garbage Collection
-    gc.collect()
+    _ = gc.collect()
 
     return epoch_loss
 
@@ -172,6 +176,7 @@ def run_training(
     valid_loader: Iterable,
     optimizer: torch.optim.Optimizer,
     scheduler,
+    scaler,
     device,
     num_epochs: int,
     fold: int,
@@ -213,6 +218,7 @@ def run_training(
             model,
             optimizer,
             scheduler,
+            scaler,
             dataloader=train_loader,
             device=device,
             epoch=epoch,

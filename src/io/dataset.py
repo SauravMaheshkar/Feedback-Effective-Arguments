@@ -95,7 +95,7 @@ def prepare_loaders(
     train_loader = torch.utils.data.DataLoader(
         train_dataset,
         batch_size=cfg["train_batch_size"],
-        num_workers=2,
+        num_workers=4,
         shuffle=True,
         pin_memory=True,
         drop_last=True,
@@ -103,7 +103,7 @@ def prepare_loaders(
     valid_loader = torch.utils.data.DataLoader(
         valid_dataset,
         batch_size=cfg["valid_batch_size"],
-        num_workers=2,
+        num_workers=4,
         shuffle=False,
         pin_memory=True,
     )

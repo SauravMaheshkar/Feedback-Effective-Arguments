@@ -5,10 +5,10 @@ import os
 from typing import Dict
 
 import torch
+import wandb
 from rich import print
 from transformers import AutoTokenizer
 
-import wandb
 from src.io.data import get_dataframe
 from src.io.dataset import prepare_loaders
 from src.nn.engine import run_training
@@ -65,6 +65,8 @@ if __name__ == "__main__":
         strategy=config["strategy"], num_splits=config["n_fold"], seed=config["seed"]
     )
 
+    scaler = torch.cuda.amp.GradScaler()
+
     # Training Pipeline
     for fold in range(config["n_fold"]):
 
@@ -107,6 +109,7 @@ if __name__ == "__main__":
             valid_loader,
             optimizer,
             scheduler,
+            scaler,
             device=device,
             num_epochs=config["epochs"],
             fold=fold,
