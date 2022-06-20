@@ -46,6 +46,7 @@ class FeedBackModel(nn.Module):
                 "hidden_dropout_prob": 0.0,
                 "add_pooling_layer": False,
                 "hidden_act": "swish",
+                "gradient_checkpointing": True,
             }
         )
         self.layer_norm = nn.LayerNorm(self.config.hidden_size)
