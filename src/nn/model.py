@@ -39,7 +39,6 @@ class FeedBackModel(nn.Module):
 
     def __init__(self, cfg: Dict) -> None:
         super().__init__()
-        self.model = AutoModel.from_pretrained(cfg["model_name"])
         self.config = AutoConfig.from_pretrained(cfg["model_name"])
         self.config.update(
             {
@@ -49,6 +48,7 @@ class FeedBackModel(nn.Module):
                 "gradient_checkpointing": True,
             }
         )
+        self.model = AutoModel.from_config(self.config)
         self.layer_norm = nn.LayerNorm(self.config.hidden_size)
         self.drop = nn.Dropout(p=cfg["classifier_dropout"])
         self.pooler = MeanPooling()
